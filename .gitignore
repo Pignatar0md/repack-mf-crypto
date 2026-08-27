@@ -1,0 +1,21 @@
+node_modules/
+agent-tools/
+.DS_Store
+*.log
+npm-debug.log*
+yarn-error.log
+dist/
+coverage/
+.metro-health-check*
+
+# Native
+**/build/
+**/.gradle/
+**/Pods/
+**/.xcode.env.local
+*.xcuserstate
+local.properties
+*.hprof
+.cxx/
+.kotlin/
+.idea/

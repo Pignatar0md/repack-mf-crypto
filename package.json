@@ -1,0 +1,21 @@
+{
+  "name": "repack-microfrontends",
+  "private": true,
+  "description": "Ejemplo mínimo de micro-frontends en React Native con Re.Pack y Module Federation.",
+  "scripts": {
+    "host:start": "npm start --prefix apps/host",
+    "mini:start": "npm start --prefix apps/mini",
+    "host:android": "npm run android --prefix apps/host",
+    "host:ios": "npm run ios --prefix apps/host",
+    "mini:android": "npm run android --prefix apps/mini",
+    "mini:ios": "npm run ios --prefix apps/mini",
+    "host:test": "npm test --prefix apps/host",
+    "mini:test": "npm test --prefix apps/mini",
+    "test": "npm run host:test && npm run mini:test",
+    "host:bundle": "npm run bundle:android --prefix apps/host",
+    "mini:bundle": "npm run bundle:android --prefix apps/mini"
+  },
+  "engines": {
+    "node": ">=22.11.0"
+  }
+}
