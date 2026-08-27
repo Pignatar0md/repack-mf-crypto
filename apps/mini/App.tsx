@@ -6,11 +6,16 @@ import {SafeAreaProvider, SafeAreaView} from 'react-native-safe-area-context';
  * Este componente es el módulo federado.
  * El Host lo carga en runtime con: import('miniApp/App')
  */
+const initialMetrics = {
+  frame: {x: 0, y: 0, width: 0, height: 0},
+  insets: {top: 0, left: 0, right: 0, bottom: 0},
+};
+
 function MiniApp() {
   const [taps, setTaps] = useState(0);
 
   return (
-    <SafeAreaProvider>
+    <SafeAreaProvider initialMetrics={initialMetrics}>
       <StatusBar barStyle="light-content" />
       <SafeAreaView style={styles.safe} edges={['bottom']}>
         <View style={styles.screen} testID="mini-screen">

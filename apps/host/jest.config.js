@@ -1,5 +1,5 @@
 module.exports = {
-  preset: '@react-native/jest-preset',
+  preset: 'react-native',
   moduleNameMapper: {
     '^miniApp/App$': '<rootDir>/__mocks__/MiniApp.tsx',
   },

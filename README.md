@@ -34,6 +34,7 @@ No hay autenticación, ni backend, ni una super-app de verdad. Solo el circuito 
 ## Requisitos
 
 - Node.js 22.11 o superior
+- React Native **0.84.1** (la versión con la que Re.Pack 5.3 está validado)
 - [Entorno de React Native](https://reactnative.dev/docs/set-up-your-environment) (Xcode y/o Android Studio)
 - Dos terminales: cada app tiene su propio servidor de Re.Pack
 
@@ -83,6 +84,7 @@ El Mini App también se puede lanzar **solo** (`npm run mini:android` / `mini:io
 apps/
   host/                 # contenedor nativo (rol Host)
     App.tsx             # navegación + React.lazy(() => import('miniApp/App'))
+    HomeScreen.tsx      # pantalla inicial del Host
     federation.d.ts     # tipos del módulo remoto
     rspack.config.mjs   # remotes + shared
   mini/                 # micro-frontend (rol Remote)
