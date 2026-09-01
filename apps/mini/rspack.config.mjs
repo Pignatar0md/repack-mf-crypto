@@ -2,7 +2,8 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import * as Repack from '@callstack/repack';
 
-const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 /**
  * Mini App: produce (expone) un módulo federado.
@@ -11,14 +12,11 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
  * Este proyecto también es una app React Native completa: puedes
  * ejecutarla sola para desarrollarla, o servirla como remote.
  */
-export default Repack.defineRspackConfig(env => {
-  const { platform } = env;
-
-  return {
+export default Repack.defineRspackConfig(env => ({
     context: __dirname,
     entry: './index.js',
     resolve: {
-      ...Repack.getResolveOptions(platform, {
+      ...Repack.getResolveOptions(env.platform, {
         enablePackageExports: true,
         preferNativePlatform: true,
       }),
@@ -65,5 +63,4 @@ export default Repack.defineRspackConfig(env => {
         },
       }),
     ],
-  };
-});
+  }));
