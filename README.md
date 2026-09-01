@@ -90,6 +90,10 @@ apps/
   mini/                 # micro-frontend (rol Remote)
     App.tsx             # componente que se expone
     rspack.config.mjs   # exposes + shared
+  crypto/               # app standalone de mercados crypto en tiempo real
+    App.tsx             # SecurityGate + TanStack Query + Zustand
+    src/                # API Binance, UI, seguridad
+    rspack.config.mjs   # Re.Pack sin Module Federation
 ```
 
 ### 1. El Mini App expone un módulo
@@ -180,6 +184,9 @@ Tampoco uses esto para colar una feature nueva que las tiendas considerarían un
 | `npm run host:android` / `host:ios` | instala el Host |
 | `npm test` | tests de Host y Mini App |
 | `npm run host:bundle` / `mini:bundle` | genera un bundle Android de comprobación |
+| `npm run crypto:start` | Re.Pack de CryptoApp en `:8083` |
+| `npm run crypto:android` / `crypto:ios` | instala la app de criptomonedas |
+| `npm run crypto:test` | tests de CryptoApp |
 
 ## Qué no incluye este repo (a propósito)
 
