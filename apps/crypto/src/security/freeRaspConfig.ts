@@ -1,6 +1,5 @@
 import {useCallback, useState} from 'react';
-import {useFreeRasp} from 'freerasp-react-native';
-import type {ThreatEventActions} from 'freerasp-react-native';
+import {useFreeRasp, type ThreatEventActions} from 'freerasp-react-native';
 
 export type SecurityThreat =
   | 'privilegedAccess'

@@ -1,10 +1,16 @@
 import React from 'react';
-import {ErrorBoundary} from 'react-error-boundary';
-import {NavigationContainer} from '@react-navigation/native';
-import {createNativeStackNavigator} from '@react-navigation/native-stack';
-import {ActivityIndicator, StatusBar, StyleSheet, Text, View} from 'react-native';
-import {SafeAreaProvider} from 'react-native-safe-area-context';
-import {HomeScreen, type RootStackParamList} from './HomeScreen';
+import { ErrorBoundary } from 'react-error-boundary';
+import { NavigationContainer } from '@react-navigation/native';
+import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import {
+  ActivityIndicator,
+  StatusBar,
+  StyleSheet,
+  Text,
+  View,
+} from 'react-native';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
+import { HomeScreen, type RootStackParamList } from './HomeScreen';
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
@@ -13,10 +19,11 @@ const Stack = createNativeStackNavigator<RootStackParamList>();
  * en rspack.config.mjs; `App` es la clave de `exposes` del Mini App.
  */
 const FederatedMiniApp = React.lazy(() => import('miniApp/App'));
+const FederatedCryptoApp = React.lazy(() => import('cryptoApp/App'));
 
 const initialMetrics = {
-  frame: {x: 0, y: 0, width: 0, height: 0},
-  insets: {top: 0, left: 0, right: 0, bottom: 0},
+  frame: { x: 0, y: 0, width: 0, height: 0 },
+  insets: { top: 0, left: 0, right: 0, bottom: 0 },
 };
 
 function App() {
@@ -26,20 +33,26 @@ function App() {
       <NavigationContainer>
         <Stack.Navigator
           screenOptions={{
-            headerStyle: {backgroundColor: '#0F172A'},
+            headerStyle: { backgroundColor: '#0F172A' },
             headerTintColor: '#F8FAFC',
-            headerTitleStyle: {fontWeight: '700'},
-            contentStyle: {backgroundColor: '#0F172A'},
-          }}>
+            headerTitleStyle: { fontWeight: '700' },
+            contentStyle: { backgroundColor: '#0F172A' },
+          }}
+        >
           <Stack.Screen
             name="Home"
             component={HomeScreen}
-            options={{title: 'Host App'}}
+            options={{ title: 'Host App' }}
           />
           <Stack.Screen
             name="MiniApp"
             component={MiniAppScreen}
-            options={{title: 'Mini App'}}
+            options={{ title: 'Mini App' }}
+          />
+          <Stack.Screen
+            name="CryptoApp"
+            component={CryptoAppScreen}
+            options={{ title: 'Crypto App' }}
           />
         </Stack.Navigator>
       </NavigationContainer>
@@ -52,6 +65,16 @@ function MiniAppScreen() {
     <ErrorBoundary FallbackComponent={MiniAppErrorFallback}>
       <React.Suspense fallback={<LoadingScreen />}>
         <FederatedMiniApp />
+      </React.Suspense>
+    </ErrorBoundary>
+  );
+}
+
+function CryptoAppScreen() {
+  return (
+    <ErrorBoundary FallbackComponent={CryptoAppErrorFallback}>
+      <React.Suspense fallback={<LoadingScreen />}>
+        <FederatedCryptoApp />
       </React.Suspense>
     </ErrorBoundary>
   );
@@ -75,6 +98,19 @@ function MiniAppErrorFallback() {
         Host puede leer su manifiesto de Federation.
       </Text>
       <Text style={styles.errorHint}>npm run mini:start</Text>
+    </View>
+  );
+}
+
+function CryptoAppErrorFallback() {
+  return (
+    <View style={styles.center}>
+      <Text style={styles.errorTitle}>Crypto App no disponible</Text>
+      <Text style={styles.errorBody}>
+        Arranca el servidor del Crypto App en el puerto 8083 y asegúrate de que
+        el Host puede leer su manifiesto de Federation.
+      </Text>
+      <Text style={styles.errorHint}>npm run crypto:start</Text>
     </View>
   );
 }

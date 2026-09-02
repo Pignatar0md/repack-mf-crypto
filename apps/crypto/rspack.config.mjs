@@ -50,6 +50,28 @@ export default Repack.defineRspackConfig(env => {
     },
     plugins: [
       new Repack.RepackPlugin(),
+      new Repack.plugins.ModuleFederationPluginV2({
+        name: 'cryptoApp',
+        filename: 'cryptoApp.container.bundle',
+        dts: false,
+        exposes: {
+          './App': './FederatedApp',
+        },
+        shared: {
+          react: {
+            singleton: true,
+            eager: true,
+          },
+          'react-native': {
+            singleton: true,
+            eager: true,
+          },
+          'react-native-safe-area-context': {
+            singleton: true,
+            eager: true,
+          },
+        },
+      }),
       ...(isProduction
         ? [
             new WebpackObfuscator(obfuscatorOptions, [

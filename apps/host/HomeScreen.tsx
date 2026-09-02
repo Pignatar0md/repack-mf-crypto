@@ -1,14 +1,15 @@
-import {Pressable, StyleSheet, Text, View} from 'react-native';
-import type {NativeStackScreenProps} from '@react-navigation/native-stack';
+import { Pressable, StyleSheet, Text, View } from 'react-native';
+import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 
 export type RootStackParamList = {
   Home: undefined;
   MiniApp: undefined;
+  CryptoApp: undefined;
 };
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Home'>;
 
-export function HomeScreen({navigation}: Props) {
+export function HomeScreen({ navigation }: Props) {
   return (
     <View style={styles.screen}>
       <Text style={styles.kicker}>Re.Pack · Module Federation</Text>
@@ -17,26 +18,42 @@ export function HomeScreen({navigation}: Props) {
       </Text>
       <Text style={styles.body}>
         Esta app nativa es el contenedor: posee iOS/Android, la navegación y las
-        dependencias compartidas (React y React Native). El Mini App vive en
-        otro proyecto y se descarga cuando pulsas el botón.
+        dependencias compartidas (React y React Native). El Mini App y el Crypto
+        App viven en otro proyecto y se descarga cuando pulsas el botón.
       </Text>
 
       <View style={styles.ports}>
         <PortChip label="Host" value="8081" />
         <PortChip label="Mini App" value="8082" />
+        <PortChip label="Crypto App" value="8083" />
       </View>
 
       <Pressable
         testID="open-mini"
-        style={({pressed}) => [styles.button, pressed && styles.buttonPressed]}
-        onPress={() => navigation.navigate('MiniApp')}>
+        style={({ pressed }) => [
+          styles.button,
+          pressed && styles.buttonPressed,
+        ]}
+        onPress={() => navigation.navigate('MiniApp')}
+      >
         <Text style={styles.buttonText}>Cargar Mini App</Text>
+      </Pressable>
+
+      <Pressable
+        testID="open-crypto"
+        style={({ pressed }) => [
+          styles.button,
+          pressed && styles.buttonPressed,
+        ]}
+        onPress={() => navigation.navigate('CryptoApp')}
+      >
+        <Text style={styles.buttonText}>Cargar Crypto App</Text>
       </Pressable>
     </View>
   );
 }
 
-function PortChip({label, value}: {label: string; value: string}) {
+function PortChip({ label, value }: { label: string; value: string }) {
   return (
     <View style={styles.chip}>
       <Text style={styles.chipLabel}>{label}</Text>

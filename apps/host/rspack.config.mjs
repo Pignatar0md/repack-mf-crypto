@@ -6,6 +6,7 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 /** Puerto del servidor de desarrollo del Mini App. */
 const MINI_APP_PORT = 8082;
+const CRYPTO_APP_PORT = 8083;
 
 /**
  * Host: consume módulos remotos.
@@ -51,6 +52,7 @@ export default Repack.defineRspackConfig(env => {
         dts: false,
         remotes: {
           miniApp: `miniApp@http://localhost:${MINI_APP_PORT}/${platform}/mf-manifest.json`,
+          cryptoApp: `cryptoApp@http://localhost:${CRYPTO_APP_PORT}/${platform}/mf-manifest.json`,
         },
         shared: {
           react: {
