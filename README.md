@@ -14,20 +14,20 @@ No auth, no backend, nor a real super-app. Just circuit required to see a micro-
 │                  │  import('miniApp/App')   │
 │                  ▼                          │
 │              manifest MF:8082/android|ios   │───────┐
-|                                             |       |
-|         ──►  CryptoApp screen               │       |
-│                  │                          │       |
-│                  │  import('cryptoApp/App') │       |
-│                  ▼                          │       |
-│              manifest MF:8083/android|ios   │       |
-└──────────────────┬──────────────────────────┘       |
-                   |                                  |
-                   |                                  |
-                   |                                  |
+│                                             │       │
+│         ──►  CryptoApp screen               │       │
+│                  │                          │       │
+│                  │  import('cryptoApp/App') │       │
+│                  ▼                          │       │
+│              manifest MF:8083/android|ios   │       │
+└──────────────────┬──────────────────────────┘       │
+                   │                                  │
+                   │                                  │
+                   │                                  │
                    ▼                                  ▼
 ┌─────────────────────────────────────────────────┐┌────────────────────────────────────────────┐
 │ Crypto App  (another project, other server)     ││ Mini App  (another project, other server)  │
-│ port 8083                                       │| port 8082                                  |
+│ port 8083                                       ││ port 8082                                  │
 │ expose:  ./App  →  apps/crypto/FederatedApp.tsx ││ expose:  ./App  →  apps/mini/App.tsx       │
 └─────────────────────────────────────────────────┘└────────────────────────────────────────────┘
 ```
