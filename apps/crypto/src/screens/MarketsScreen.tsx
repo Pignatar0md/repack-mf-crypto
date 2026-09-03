@@ -5,20 +5,18 @@ import {
   Text,
   View,
 } from 'react-native';
-import {SafeAreaView} from 'react-native-safe-area-context';
-import {ConnectionBadge} from '../components/ConnectionBadge';
-import {CryptoList} from '../components/CryptoList';
-import {useCryptoLivePrices} from '../hooks/useCryptoLivePrices';
-import {useCryptoMarkets} from '../hooks/useCryptoMarkets';
-import {
-  selectOrderedAssets,
-  useCryptoStore,
-} from '../store/cryptoStore';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { ConnectionBadge } from '../components/ConnectionBadge';
+import { CryptoList } from '../components/CryptoList';
+import { useCryptoLivePrices } from '../hooks/useCryptoLivePrices';
+import { useCryptoMarkets } from '../hooks/useCryptoMarkets';
+import { selectOrderedAssets, useCryptoStore } from '../store/cryptoStore';
+import { useShallow } from 'zustand/react/shallow';
 
 export function MarketsScreen() {
-  const {isLoading, isError, error, refetch, streamSymbols, isRefreshing} =
+  const { isLoading, isError, error, refetch, streamSymbols, isRefreshing } =
     useCryptoMarkets();
-  const assets = useCryptoStore(selectOrderedAssets);
+  const assets = useCryptoStore(useShallow(selectOrderedAssets));
   const wsStatus = useCryptoStore(state => state.wsStatus);
   const lastWsUpdateAt = useCryptoStore(state => state.lastWsUpdateAt);
 

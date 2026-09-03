@@ -1,50 +1,59 @@
-# Micro-frontends en React Native con Re.Pack
+# React Native Micro-frontends using Re.Pack
 
-Ejemplo **mínimo** para aprender Module Federation en React Native: un **Host** (la app que se instala en el teléfono) y un **Mini App** (un módulo JavaScript que el Host descarga en runtime).
+**Minimum** example to learn Module Federation in React Native: a **Host** (app that is installed on device), a **Crypto App** (a JS module that Host downloads in runtime) and a **Mini App** (another JS module that Host downloads in runtime).
 
-No hay autenticación, ni backend, ni una super-app de verdad. Solo el circuito que hace falta para ver un micro-frontend cargarse dentro de otra app.
+No auth, no backend, nor a real super-app. Just circuit required to see a micro-frontend being loaded inside another app.
 
 ```
 ┌─────────────────────────────────────────────┐
-│  Host App  (se instala en el dispositivo)   │
-│  puerto 8081                                │
+│  Host App  (it is installed in device)      │
+│  port 8081                                  │
 │                                             │
 │   Home  ──►  MiniApp screen                 │
 │                  │                          │
 │                  │  import('miniApp/App')   │
 │                  ▼                          │
-│         manifiesto MF  :8082/android|ios    │
-└──────────────────┬──────────────────────────┘
-                   │
-                   ▼
-┌─────────────────────────────────────────────┐
-│  Mini App  (otro proyecto, otro servidor)   │
-│  puerto 8082                                │
-│  expone:  ./App  →  apps/mini/App.tsx       │
-└─────────────────────────────────────────────┘
+│              manifest MF:8082/android|ios   │───────┐
+|                                             |       |
+|         ──►  CryptoApp screen               │       |
+│                  │                          │       |
+│                  │  import('cryptoApp/App') │       |
+│                  ▼                          │       |
+│              manifest MF:8083/android|ios   │       |
+└──────────────────┬──────────────────────────┘       |
+                   |                                  |
+                   |                                  |
+                   |                                  |
+                   ▼                                  ▼
+┌─────────────────────────────────────────────────┐┌────────────────────────────────────────────┐
+│ Crypto App  (another project, other server)     ││ Mini App  (another project, other server)  │
+│ port 8083                                       │| port 8082                                  |
+│ expose:  ./App  →  apps/crypto/FederatedApp.tsx ││ expose:  ./App  →  apps/mini/App.tsx       │
+└─────────────────────────────────────────────────┘└────────────────────────────────────────────┘
 ```
 
-## Qué vas a aprender
+## Learnt things
 
-1. Por qué Re.Pack (Rspack) en lugar de Metro.
-2. El contrato Host / Remote: `remotes` + `exposes` + `shared`.
-3. Cómo el Host importa un módulo que **no está** en su bundle inicial.
-4. El límite nativo: el JS puede llegar tarde; el código nativo no.
+1. Why Re.Pack (Rspack) instead of Metro.
+2. Host / Remote contract: `remotes` + `exposes` + `shared`.
+3. How Host imports a module that **doesn't exist** on its initial bundle.
+4. The native limit: JS can load delayed; but not native code.
 
-## Requisitos
+## Requirements
 
-- Node.js 22.11 o superior
-- React Native **0.84.1** (la versión con la que Re.Pack 5.3 está validado)
-- [Entorno de React Native](https://reactnative.dev/docs/set-up-your-environment) (Xcode y/o Android Studio)
-- Dos terminales: cada app tiene su propio servidor de Re.Pack
+- Node.js ^22.11
+- React Native **0.84.1** (version which Re.Pack 5.3 is validated)
+- [React Native env](https://reactnative.dev/docs/set-up-your-environment) (Xcode & Android Studio)
+- 4 terminals: every app has its own Re.Pack server
 
-## Cómo ejecutarlo
+## How running it
 
-En la raíz del repo:
+In root's repo/folder:
 
 ```sh
 npm install --prefix apps/host
 npm install --prefix apps/mini
+npm install --prefix apps/crypto
 ```
 
 Terminal 1 — Host:
@@ -59,147 +68,176 @@ Terminal 2 — Mini App:
 npm run mini:start
 ```
 
-Terminal 3 — solo el Host se instala en el dispositivo:
+Terminal 3 — Crypto App:
+
+```sh
+npm run crypto:start
+```
+
+Terminal 4 — only Host is installed in device:
 
 ```sh
 npm run host:android
-# o, en macOS:
+# or, in macOS:
 npm run host:ios
 ```
 
-Abre la app, pulsa **Cargar Mini App**. Deberías ver un loading breve y después la pantalla naranja del Mini App.
+Open the app, touch **Cargar Mini App**. You should see a speedy loading and then the Mini App screen (an orange one).
 
-Si ves «Mini App no disponible», el Host no alcanzó el manifiesto. Comprueba que `:8082` está arriba. En un emulador Android suele hacer falta:
+Open the app, touch **Cargar Crypto App**. You should see a speedy loading and then the Crypto App screen (a list of crypto assets which prices updates in real-time).
+
+If «Mini App no disponible» or «Crypto App no disponible» message is shown, Host app didn´t get the manifest. Check `:8082`/`:8083` is up and running. Sometimes is needed to do in an android emulator these steps:
 
 ```sh
 adb reverse tcp:8081 tcp:8081
 adb reverse tcp:8082 tcp:8082
+adb reverse tcp:8083 tcp:8083
 ```
 
-El Mini App también se puede lanzar **solo** (`npm run mini:android` / `mini:ios`) para desarrollarlo aislado. En el flujo federado no hace falta instalarlo: basta con su servidor.
+Mini and Crypto App can be launched **standalone** (`npm run mini:android` / `mini:ios` or `npm run crypto:android` / `crypto:ios`) for isolated development too. No need to be installed in federated flow: just the running server.
 
-## Anatomía del ejemplo
+## Folder structure of the example
 
 ```
 apps/
-  host/                 # contenedor nativo (rol Host)
-    App.tsx             # navegación + React.lazy(() => import('miniApp/App'))
-    HomeScreen.tsx      # pantalla inicial del Host
-    federation.d.ts     # tipos del módulo remoto
+  host/                 # native container (rol Host)
+    App.tsx             # navigation + React.lazy(() => import('miniApp/App')) + React.lazy(() => import('cryptoApp/App'))
+    HomeScreen.tsx      # Host initial screen
+    federation.d.ts     # remote module types
     rspack.config.mjs   # remotes + shared
-  mini/                 # micro-frontend (rol Remote)
-    App.tsx             # componente que se expone
+  mini/                 # micro-frontend (Remote role)
+    App.tsx             # exposed component
     rspack.config.mjs   # exposes + shared
-  crypto/               # app standalone de mercados crypto en tiempo real
+  crypto/               # real-time crypto market app (remote role micro-frontend)
+    FederatedApp.tsx    # exposed component
     App.tsx             # SecurityGate + TanStack Query + Zustand
-    src/                # API Binance, UI, seguridad
-    rspack.config.mjs   # Re.Pack sin Module Federation
+    src/                # API Binance, UI, security
+    rspack.config.mjs   # Re.Pack with Module Federation
 ```
 
-### 1. El Mini App expone un módulo
+### 1.a The Mini App exposes a module
 
-En `apps/mini/rspack.config.mjs`:
+In `apps/mini/rspack.config.mjs`:
 
 ```js
-new Repack.plugins.ModuleFederationPluginV2({
-  name: 'miniApp',
-  filename: 'miniApp.container.bundle',
-  exposes: {
-    './App': './App', // archivo local App.tsx
-  },
-  // ...
+new Repack.plugins.ModuleFederationPluginV2({ 
+name: 'miniApp', 
+filename: 'miniApp.container.bundle', 
+exposes: { 
+'./App': './App', // local file App.tsx 
+}, 
+//...
 });
 ```
 
-`name` es el identificador del *container*. `exposes` publica módulos. El Host los pide como `miniApp/App` (nombre + clave de `exposes`).
+`name` is the identifier of the *container*. `exposes` publishes modules. The Host requests them as `miniApp/App` (name + `exposes` key).
 
-### 2. El Host registra el remote
+### 1.b The Crypto App exposes a module
 
-En `apps/host/rspack.config.mjs`:
+In `apps/crypto/rspack.config.mjs`:
 
 ```js
-remotes: {
-  miniApp: `miniApp@http://localhost:8082/${platform}/mf-manifest.json`,
+new Repack.plugins.ModuleFederationPluginV2({ 
+name: 'cryptoApp', 
+filename: 'cryptoApp.container.bundle', 
+exposes: { 
+'./App': './FederatedApp', // local file App.tsx 
+}, 
+//...
+});
+```
+Check crypto[README.md](apps/crypto/README.md) for binance, security and other details.
+
+`name` is the identifier of the *container*. `exposes` publishes modules. The Host requests them as `ryptoApp/App` (name + `exposes` key).
+
+### 2. The Host registers the remote
+
+In `apps/host/rspack.config.mjs`:
+
+```js
+remotes: { 
+miniApp: `miniApp@http://localhost:8082/${platform}/mf-manifest.json`,
+cryptoApp: `cryptoApp@http://localhost:${CRYPTO_APP_PORT}/${platform}/mf-manifest.json`,
 }
 ```
 
-Tres piezas en esa cadena:
+Three pieces in that chain:
 
-| Parte | Significado |
+| Part | Meaning |
 | --- | --- |
-| clave `miniApp` | lo que usas en `import('miniApp/…')` |
-| prefijo `miniApp@` | debe coincidir con `name` del Mini App |
-| URL `…/ios\|android/mf-manifest.json` | manifiesto que genera el servidor del Mini App |
+| key `miniApp` | what you use in `import('miniApp/…')` |
+| prefix `miniApp@` | must match `name` of the Mini App |
+| URL `…/ios\|android/mf-manifest.json` | manifest generated by the Mini App server |
 
-El `platform` importa: Re.Pack emite bundles distintos para iOS y Android.
+The platform matters: Re.Pack issues different bundles for iOS and Android.
 
-### 3. Dependencias compartidas
+### 3. Shared dependencies
 
-React y React Native **tienen que ser singleton**. Dos copias de React en el mismo proceso rompen los hooks (`Invalid hook call`).
+React and React Native **have to be singleton**. Two copies of React in the same process break hooks (`Invalid hook call`).
 
 ```js
-shared: {
-  react: { singleton: true, eager: true },
-  'react-native': { singleton: true, eager: true },
+shared: { 
+  'react': { singleton: true, eager: true }, 
+  'react-native': { singleton: true, eager: true }, 
   'react-native-safe-area-context': { singleton: true, eager: true },
 }
 ```
 
-- `singleton: true` — una sola instancia en runtime.
-- `eager: true` — se incluye en el bundle inicial (el Host las tiene listas antes de pedir el remote).
+- `singleton: true` — a single instance at runtime.
+- `eager: true` — is included in the initial bundle (the Host has them ready before requesting the remote).
 
-Las versiones de `react` y `react-native` deben ser **idénticas** en Host y Mini App.
+The versions of `react` and `react-native` must be **identical** on Host, Crypto and Mini App.
 
-### 4. Carga perezosa en el Host
+### 4. Lazy loading on the Host
 
 ```tsx
 const FederatedMiniApp = React.lazy(() => import('miniApp/App'));
+const FederatedCryptoApp = React.lazy(() => import('cryptoApp/App'));
 ```
 
-Hasta que navegas a esa pantalla no se pide el JS remoto. `React.Suspense` cubre la espera; `ErrorBoundary` cubre un servidor caído o un remote incompatible. El Host sigue usable aunque el Mini App falle: eso es parte del diseño.
+Until you navigate to that screen, the remote JS is not requested. `React.Suspense` covers the wait; `ErrorBoundary` covers a downed server or incompatible remote. The Host remains usable even if the Mini App fails: that's part of the design.
 
-## El detalle que no existe en la web
+## The detail that does not exist on the web
 
-En la web, un micro-frontend puede traer casi todo lo que necesita. En móvil, **el código nativo ya tiene que estar en el binario** que subiste a la tienda.
+On the web, a micro-frontend can bring almost everything you need. On mobile, **the native code must already be in the binary** that you uploaded to the store.
 
-Module Federation descarga JavaScript. No puede añadir un módulo nativo, un permiso o un framework de iOS después de instalar la app.
+Module Federation downloads JavaScript. You can't add a native module, permission, or iOS framework after installing the app.
 
-Consecuencia práctica: si el Mini App usa la cámara, el Host tuvo que incluir esa librería nativa en *su* release. El Mini App solo entrega el JS que llama a esa API.
+Practical consequence: if the Mini App uses the camera, the Host had to include that native library in *its* release. The Mini App only delivers the JS that calls that API.
 
-Tampoco uses esto para colar una feature nueva que las tiendas considerarían un cambio de producto. Re.Pack sirve para partir bundles, retrasar carga y actualizar JS ya contemplado en el binario.
+Also don't use this to sneak in a new feature that stores would consider a product change. Re.Pack is used to split bundles, delay loading and update JS already included in the binary.
 
-## Experimentos (para interiorizarlo)
+## Experiments
 
-1. Cambia el color de fondo en `apps/mini/App.tsx`, guarda, recarga el Host. El nativo no se recompila: estás viendo el remote nuevo.
-2. Para el servidor del Mini App y abre la pantalla federada. Debería salir el estado de error del Host.
-3. Añade un segundo `exposes` (por ejemplo `./Counter`) e impórtalo desde el Host.
-4. Crea otro mini-app en `apps/` copiando `mini`, cambia `name` / puerto / `remotes`, y cárgalo en otra pantalla.
+1. Change background color in `apps/mini/App.tsx`, save, reload the Host. The native app does not recompile: you are seeing the new remote.
+2. Stop mini app server and open federated. Host error status should be seen.
+3. Add a second `exposes` (as `./Counter`) and import it from Host.
+4. Create another mini-app in `apps/` copying `mini`, change `name` / port / `remotes`, and load it in another screen.
 
-## Scripts útiles
+## Useful scripts
 
-| Script | Qué hace |
+| Script | Action |
 | --- | --- |
-| `npm run host:start` | Re.Pack del Host en `:8081` |
-| `npm run mini:start` | Re.Pack del Mini App en `:8082` |
-| `npm run host:android` / `host:ios` | instala el Host |
-| `npm test` | tests de Host y Mini App |
-| `npm run host:bundle` / `mini:bundle` | genera un bundle Android de comprobación |
-| `npm run crypto:start` | Re.Pack de CryptoApp en `:8083` |
-| `npm run crypto:android` / `crypto:ios` | instala la app de criptomonedas |
-| `npm run crypto:test` | tests de CryptoApp |
+| `npm run host:start` | Host Re.Pack in `:8081` |
+| `npm run mini:start` | Mini Re.Pack in `:8082` |
+| `npm run host:android` / `host:ios` | installs Host |
+| `npm test` | Host and Mini App tests |
+| `npm run host:bundle` / `mini:bundle` | generates an Android bundle checking |
+| `npm run crypto:start` | CryptoApp Re.Pack in `:8083` |
+| `npm run crypto:android` / `crypto:ios` | installs CryptoApp |
+| `npm run crypto:test` | CryptoApp tests |
 
-## Qué no incluye este repo (a propósito)
+## Things not included on this repo (intentionally)
 
-- Un tercer mini-app ni un paquete de diseño compartido
-- Hosting de bundles en producción (CDN, Zephyr Cloud, etc.)
-- Versionado y firma de remotes
-- Workspaces con hoisting: cada app tiene su `node_modules` para evitar el clásico pie de monorepo + React Native
+- Production bundles hosting (CDN, Zephyr Cloud, etc.)
+- Versioning and remotes signature
+- Workspaces with hoisting: every app has its `node_modules` to avoid the classic monorepo foot + React Native
 
-Cuando quieras un ejemplo más grande: [Super App Showcase](https://github.com/callstack/super-app-showcase) de Callstack.
+Bigger example: [Super App Showcase](https://github.com/callstack/super-app-showcase) from Callstack.
 
-## Referencias
+## References
 
 - [Re.Pack — Quick start](https://re-pack.dev/docs/getting-started/quick-start)
 - [ModuleFederationPluginV2](https://re-pack.dev/api/plugins/module-federation-v2)
-- [Guía Super App de Callstack](https://www.callstack.com/blog/step-by-step-guide-to-super-app-development)
+- [Callstack Super App Guide](https://www.callstack.com/blog/step-by-step-guide-to-super-app-development)
 - [Module Federation 2](https://module-federation.io/)

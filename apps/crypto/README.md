@@ -1,61 +1,65 @@
-# CryptoApp — Mercados en tiempo real
+# CryptoApp — real-time markets
 
-App React Native standalone con listado de criptomonedas USDT alimentado por **Binance** (REST + WebSocket), estado con **Zustand**, caché con **TanStack Query**, y capa de seguridad (SSL pinning, Keychain, freeRASP, ofuscación).
+Standalone React Native app with USDT cryptocurrency listing powered by Binance (REST + WebSocket), status management with Zustand, caching with TanStack Query, and a security layer (SSL pinning, Keychain, FreeRASP, obfuscation).
 
-## Requisitos
+## Requirements
 
 - Node.js >= 22.11
 - React Native 0.84.1
-- Android Studio y/o Xcode
+- Android Studio and/or Xcode
 
-## Instalación
+## Installation
 
 ```sh
 npm install --prefix apps/crypto
 ```
 
-## Ejecución
+## Execution
 
 ```sh
-# Terminal 1 — servidor Re.Pack (puerto 8083)
+# Terminal 1 — Re.Pack server (port 8083)
 npm run crypto:start
 
-# Terminal 2 — instalar en dispositivo/emulador
+# Terminal 2 — install on device/emulator
 npm run crypto:android
-# o en macOS:
+# or on macOS:
 npm run crypto:ios
 ```
 
-Emulador Android:
+Android Emulator:
 
 ```sh
 adb reverse tcp:8083 tcp:8083
 ```
 
-## Arquitectura de datos
+## Data Architecture
 
-| Campo | Fuente |
+| Field | Source |
+
 | --- | --- |
-| Precio, vol 24h, % 24h | Binance REST + WebSocket `!miniTicker@arr` / `@ticker` |
+
+| Price, 24h vol, 24h % | Binance REST + WebSocket `!miniTicker@arr` / `@ticker` |
+
 | % 1h | Binance WebSocket `@kline_1h` |
-| Liquidez (proxy) | Spread bid/ask + volumen quote 24h |
-| Market cap | CoinGecko REST `/coins/markets` (complementario) |
+| Liquidity (proxy) | Spread bid/ask + quote volume 24h |
+| Market cap | CoinGecko REST `/coins/markets` (complementary) |
 
-**Limitación:** Binance Spot no expone market cap nativamente. CoinGecko complementa ese campo con cache de 5 minutos.
+**Limitation:** Binance Spot does not natively expose market cap. CoinGecko complements that field with a 5-minute cache.
 
-## Seguridad
+## Security
 
-- **SSL Pinning:** `react-native-ssl-public-key-pinning` en `api.binance.com`, `stream.binance.com` y `api.coingecko.com` (solo release).
-- **Keychain:** secrets en `src/security/keychain.ts` (p. ej. API keys futuras).
+- **SSL Pinning:** `react-native-ssl-public-key-pinning` on `api.binance.com`, `stream.binance.com` and `api.coingecko.com` (release only).
+- **Keychain:** secrets in `src/security/keychain.ts` (e.g. future API keys).
 - **Root/Jailbreak:** `freerasp-react-native` + `SecurityGate`.
-- **Ofuscación:** `webpack-obfuscator` en Rspack production + R8/ProGuard en Android release.
+- **Obfuscation:** `webpack-obfuscator` in Rspack production + R8/ProGuard in Android release.
 
-### Configuración freeRASP para producción
+### FreeRASP configuration for production
 
-Editar `src/security/freeRaspConfig.ts`:
+Edit `src/security/freeRaspConfig.ts`:
 
-- `androidConfig.certificateHashes` — hash del certificado de release.
-- `iosConfig.appTeamId` — Team ID de Apple Developer.
+- `androidConfig.certificateHashes` — hash of the release certificate.
+
+- `iosConfig.appTeamId` — Apple Developer Team ID.
 
 ## Tests
 
@@ -63,23 +67,27 @@ Editar `src/security/freeRaspConfig.ts`:
 npm run crypto:test
 ```
 
-## Build release Android
+## Build Android release
 
 ```sh
 cd apps/crypto/android
 ./gradlew assembleRelease
 ```
 
-El bundle JS se ofusca automáticamente cuando Re.Pack compila en modo `production`.
+The JS bundle is automatically obfuscated when Re.Pack compiles in `production` mode.
 
-## Actualizar hashes SSL
+## Update SSL hashes
 
 ```sh
-echo | openssl s_client -connect api.binance.com:443 -servername api.binance.com 2>/dev/null \
-  | openssl x509 -pubkey -noout \
-  | openssl pkey -pubin -outform der \
-  | openssl dgst -sha256 -binary \
-  | openssl enc -base64
+echo | openssl s_client -connect api.binance.com:443 -servername api.binance.com 2>/dev/null
+
+| openssl x509 -pubkey -noout
+
+| openssl pkey -pubin -outform der
+
+| openssl dgst -sha256 -binary
+
+| openssl enc -base64
 ```
 
-Añadir el resultado como `sha256/<hash>` en `src/security/sslPinning.ts`. Mantener al menos un hash de backup para rotación de certificados.
+Add the result as `sha256/<hash>` in `src/security/sslPinning.ts`. Keep at least one backup hash for certificate rotation.

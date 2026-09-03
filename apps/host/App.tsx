@@ -15,8 +15,7 @@ import { HomeScreen, type RootStackParamList } from './HomeScreen';
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
 /**
- * Carga perezosa del remote. `miniApp` es la clave de `remotes`
- * en rspack.config.mjs; `App` es la clave de `exposes` del Mini App.
+ * Lazy loading of the remote.
  */
 const FederatedMiniApp = React.lazy(() => import('miniApp/App'));
 const FederatedCryptoApp = React.lazy(() => import('cryptoApp/App'));
